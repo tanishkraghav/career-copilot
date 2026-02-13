@@ -1,0 +1,4 @@
+project_id = "bybqcjxiviivwgkajhkp"
+
+[functions.generate-outreach]
+verify_jwt = false
