@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/DashboardLayout";
 import ResultsView from "@/components/ResultsView";
+import ResumeUpload from "@/components/ResumeUpload";
 import { Sparkles, FileText, Building2, User, Loader2 } from "lucide-react";
 
 interface GenerationResult {
@@ -113,22 +114,7 @@ const Dashboard = () => {
         </div>
 
         <div className="space-y-6">
-          <Card className="border border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" /> Resume
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                placeholder="Paste your resume content here... Include your skills, projects, internships, education etc."
-                value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
-                rows={8}
-                className="resize-none"
-              />
-            </CardContent>
-          </Card>
+          <ResumeUpload value={resumeText} onChange={setResumeText} />
 
           <Card className="border border-border">
             <CardHeader className="pb-3">
