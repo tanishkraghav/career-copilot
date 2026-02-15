@@ -32,6 +32,7 @@ const Admin = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -41,7 +42,19 @@ const Admin = () => {
         supabase.from("payments").select("*").order("created_at", { ascending: false }),
       ]);
       setUsers(usersRes.data || []);
-      setPayments(paymentsRes.data || []);
+      const paymentsData = paymentsRes.data || [];
+      setPayments(paymentsData);
+
+      // Generate signed URLs for all payment screenshots
+      const urls: Record<string, string> = {};
+      for (const p of paymentsData) {
+        const { data } = await supabase.storage
+          .from("payment-screenshots")
+          .createSignedUrl(p.screenshot_url, 3600);
+        if (data?.signedUrl) urls[p.id] = data.signedUrl;
+      }
+      setSignedUrls(urls);
+
       setLoading(false);
     };
     fetchData();
@@ -98,9 +111,11 @@ const Admin = () => {
                         <p className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <a href={p.screenshot_url} target="_blank" rel="noopener noreferrer">
+                        {signedUrls[p.id] && (
+                        <a href={signedUrls[p.id]} target="_blank" rel="noopener noreferrer">
                           <Button variant="ghost" size="sm"><ExternalLink className="w-3.5 h-3.5" /></Button>
                         </a>
+                        )}
                         <Badge variant={p.status === "approved" ? "default" : p.status === "rejected" ? "destructive" : "secondary"}>
                           {p.status}
                         </Badge>
