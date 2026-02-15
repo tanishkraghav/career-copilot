@@ -75,7 +75,11 @@ const Dashboard = () => {
         },
       });
 
-      if (response.error) throw new Error(response.error.message);
+      if (response.error) {
+        // Try to extract the actual error message from the response data
+        const errorMsg = response.data?.error || response.error.message;
+        throw new Error(errorMsg);
+      }
 
       const data = response.data as GenerationResult;
       setResult(data);
