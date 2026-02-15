@@ -50,6 +50,21 @@ serve(async (req) => {
       });
     }
 
+    // Time-based rate limiting: max 10 requests per minute per user
+    const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+    const { count: recentRequests } = await supabase
+      .from("generations")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", oneMinuteAgo);
+
+    if ((recentRequests ?? 0) >= 10) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment before trying again." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     let body;
     try {
       body = requestSchema.parse(await req.json());
