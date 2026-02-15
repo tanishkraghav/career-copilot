@@ -29,13 +29,9 @@ const Upgrade = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("payment-screenshots")
-        .getPublicUrl(filePath);
-
       await supabase.from("payments").insert({
         user_id: user.id,
-        screenshot_url: publicUrl,
+        screenshot_url: filePath,
         status: "pending",
       });
 
