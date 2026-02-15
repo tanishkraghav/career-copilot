@@ -156,14 +156,14 @@ const Landing = () => {
             variants={fadeUp}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link to="/auth">
+            <Link to={user ? "/dashboard" : "/auth"}>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button size="lg" className="bg-gradient-hero text-primary-foreground shadow-glow px-8 h-14 text-base rounded-xl">
-                  Start Free — 5 Credits <ArrowRight className="ml-2 h-4 w-4" />
+                  {user ? "Go to Dashboard" : "Start Free — 5 Credits"} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </motion.div>
             </Link>
-            <p className="text-sm text-muted-foreground">No credit card required</p>
+            {!user && <p className="text-sm text-muted-foreground">No credit card required</p>}
           </motion.div>
 
           {/* Stats bar */}
