@@ -1,5 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.23.8";
+
+const requestSchema = z.object({
+  resume_text: z.string().min(50, "Resume must be at least 50 characters").max(10000, "Resume exceeds 10000 characters"),
+  job_description: z.string().min(20, "Job description must be at least 20 characters").max(5000, "Job description exceeds 5000 characters"),
+  company_name: z.string().min(1, "Company name is required").max(200),
+  company_website: z.string().url().max(500).optional().or(z.literal("")),
+  recruiter_name: z.string().max(100).optional().or(z.literal("")),
+  tone: z.enum(["professional", "confident", "friendly"]).default("professional"),
+  email_length: z.enum(["short", "medium", "detailed"]).default("medium"),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,7 +50,20 @@ serve(async (req) => {
       });
     }
 
-    const { resume_text, job_description, company_name, company_website, recruiter_name, tone, email_length } = await req.json();
+    let body;
+    try {
+      body = requestSchema.parse(await req.json());
+    } catch (validationError) {
+      const message = validationError instanceof z.ZodError
+        ? validationError.errors.map(e => e.message).join(", ")
+        : "Invalid request data";
+      return new Response(JSON.stringify({ error: message }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { resume_text, job_description, company_name, company_website, recruiter_name, tone, email_length } = body;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
