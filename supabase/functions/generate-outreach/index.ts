@@ -6,7 +6,7 @@ const requestSchema = z.object({
   resume_text: z.string().min(50, "Resume must be at least 50 characters").max(10000, "Resume exceeds 10000 characters"),
   job_description: z.string().min(20, "Job description must be at least 20 characters").max(5000, "Job description exceeds 5000 characters"),
   company_name: z.string().min(1, "Company name is required").max(200),
-  company_website: z.union([z.string().url().max(500), z.literal("")]).optional().default(""),
+  company_website: z.string().max(500).optional().default(""),
   recruiter_name: z.string().max(100).optional().default(""),
   tone: z.enum(["professional", "confident", "friendly"]).default("professional"),
   email_length: z.enum(["short", "medium", "detailed"]).default("medium"),
