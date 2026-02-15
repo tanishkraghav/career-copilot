@@ -75,24 +75,20 @@ const Dashboard = () => {
         },
       });
 
-      // Handle errors - check both error object and error in response data
+      // Handle errors from the edge function
       if (response.error) {
-        // For FunctionsHttpError, the response body may contain a specific error message
         let errorMsg = "Something went wrong";
         try {
-          if (response.error instanceof Error && 'context' in response.error) {
-            const ctx = (response.error as any).context;
-            if (ctx && typeof ctx.json === 'function') {
-              const body = await ctx.json();
-              errorMsg = body?.error || response.error.message;
-            } else {
-              errorMsg = response.data?.error || response.error.message;
-            }
+          // The response property contains the raw Response object
+          const rawResponse = (response as any).response;
+          if (rawResponse && typeof rawResponse.json === 'function') {
+            const body = await rawResponse.json();
+            errorMsg = body?.error || response.error.message;
           } else {
-            errorMsg = response.data?.error || response.error.message;
+            errorMsg = response.error.message;
           }
         } catch {
-          errorMsg = response.data?.error || response.error.message;
+          errorMsg = response.error.message;
         }
         throw new Error(errorMsg);
       }
